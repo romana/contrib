@@ -46,7 +46,7 @@ func main() {
 		r := search.SearchResource(config, search.SearchRequest{Tag: *searchTag})
 		response, err := json.Marshal(r)
 		if err != nil {
-			panic(err)
+			log.Fatal("Failed to parse out server response, ", err)
 		}
 		fmt.Println(string(response))
 	} else {
