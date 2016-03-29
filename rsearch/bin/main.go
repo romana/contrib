@@ -44,7 +44,7 @@ func main() {
 			log.Println("Making request t the server")
 		}
 		r := search.SearchResource(config, search.SearchRequest{Tag: *searchTag})
-		response, _ := json.Marshal(r)
+		response, err := json.Marshal(r)
 		if err != nil {
 			panic(err)
 		}
