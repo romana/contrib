@@ -32,6 +32,7 @@ type SearchRequest struct {
 // SearchResponse is a list of kubernetes objects
 type SearchResponse []KubeObject
 
+// responseWaiter dispatches search request and waits for search response to arrive.
 func responseWaiter(w http.ResponseWriter, request SearchRequest, inbox chan<- SearchRequest, config Config) {
 	// Making channel for search responses
 	request.Resp = make(chan SearchResponse)
@@ -64,6 +65,7 @@ func responseWaiter(w http.ResponseWriter, request SearchRequest, inbox chan<- S
 	fmt.Fprint(w, string(result))
 }
 
+// handler to serve search requests from client from this library.
 func handler(w http.ResponseWriter, r *http.Request, inbox chan<- SearchRequest, config Config) {
 	decoder := json.NewDecoder(r.Body)
 	request := SearchRequest{}

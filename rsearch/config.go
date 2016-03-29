@@ -19,7 +19,8 @@ import (
 	"gopkg.in/gcfg.v1"
 )
 
-// Done is an alias for empty struct, used for termination channels
+// Done is an alias for empty struct, used to make broadcast channels
+// for terminating goroutines.
 type Done struct{}
 
 // Config is a top level struct describing expected structure of config file.
@@ -52,7 +53,7 @@ type Resource struct {
 	UrlPostfix string
 }
 
-// NewConfig parsing config file and returning initialized instance of Config structure
+// NewConfig parsing config file and returning initialized instance of Config structure.
 func NewConfig(configFile string) (Config, error) {
 	cfg := Config{}
 	if err := gcfg.ReadFileInto(&cfg, configFile); err != nil {

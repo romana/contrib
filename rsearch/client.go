@@ -23,8 +23,8 @@ import (
 	"net/http"
 )
 
-// SearchResource connects to instance of a server
-// and resolves SearchRequest
+// SearchResource makes HTTP request to the server
+// instance if this library.
 func SearchResource(config Config, req SearchRequest) SearchResponse {
 	// TODO need to make url configurable
 	url := config.Server.Host + ":" + config.Server.Port
@@ -33,7 +33,7 @@ func SearchResource(config Config, req SearchRequest) SearchResponse {
 		log.Println("Making request with", string(data))
 	}
 
-	// Make request
+	// Making request.
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}

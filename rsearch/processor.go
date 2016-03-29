@@ -26,27 +26,27 @@ import (
 // Process is a goroutine that consumes resource update events and maintains a searchable
 // cache of all known resources. It also accepts search requests and perform searches.
 func Process(in <-chan Event, done chan Done, config Config) chan<- SearchRequest {
-	// Channel to submit SearchRequest's into
+	// Channel to submit SearchRequest's into.
 	req := make(chan SearchRequest)
 
 	// storage map is a cache of known KubeObjects
-	// arranged by NPid
+	// arranged by NPid.
 	storage := make(map[string]KubeObject)
 
 	// search map is a cache of known NPid's
 	// arranged by Selectors, where selector being
-	// a field by which we search
+	// a field by which we search.
 	search := make(map[string]map[string]bool)
 
 	go func() {
 		for {
 			select {
 			case e := <-in:
-				// On incoming event update caches
+				// On incoming event update caches.
 				updateStorage(e, storage, search, config)
 			case request := <-req:
 				// On incoming search request return a list
-				// of resources with matching Selectors
+				// of resources with matching Selectors.
 				processSearchRequest(storage, search, request, config)
 			case <-done:
 				return
@@ -57,6 +57,7 @@ func Process(in <-chan Event, done chan Done, config Config) chan<- SearchReques
 	return req
 }
 
+// processSearchRequest looks up for KubeObjects with selector matching request.Tag and returns a list of matching objects.
 func processSearchRequest(storage map[string]KubeObject, search map[string]map[string]bool, req SearchRequest, config Config) SearchResponse {
 	if config.Server.Debug {
 		log.Println("Received request", req)
@@ -84,6 +85,7 @@ func processSearchRequest(storage map[string]KubeObject, search map[string]map[s
 	return resp
 }
 
+// updateStorage maintaines up to date state of search and storage maps.
 func updateStorage(e Event, storage map[string]KubeObject, search map[string]map[string]bool, config Config) {
 	NPid := e.Object.makeId()
 	Selector := e.Object.getSelector(config)

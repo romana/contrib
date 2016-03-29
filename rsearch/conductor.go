@@ -15,12 +15,18 @@
 
 package rsearch
 
+import (
+	"log"
+)
+
+// manageResources manages map of termination channels and fires up new
+// per-namespace gorotines when needed.
 func manageResources(ns Event, terminators map[string]chan Done, config Config, out chan Event) {
 	uid := ns.Object.Metadata.Uid
 	if ns.Type == KubeEventAdded {
 		if _, ok := terminators[uid]; ok {
 			log.Println("Received ADDED event for uid that is already known, ignoring ", uid)
-			break
+			return
 		}
 
 		done := make(chan Done)
@@ -29,7 +35,7 @@ func manageResources(ns Event, terminators map[string]chan Done, config Config, 
 	} else if ns.Type == KubeEventDeleted {
 		if _, ok := terminators[uid]; !ok {
 			log.Println("Received DELETED event for uid that is not known, ignoring ", uid)
-			break
+			return
 		}
 
 		close(terminators[uid])
@@ -44,9 +50,12 @@ func manageResources(ns Event, terminators map[string]chan Done, config Config, 
 
 // Conductor manages a set of goroutines one per namespace.
 func Conductor(in <-chan Event, done <-chan Done, config Config) <-chan Event {
+	// done in arguments is a channel that can be used to stop Conductor itsefl
+	// while map of Done's below is for terminating managed gorotines.
+
 	// Idea of this map is to keep termination channels organized
 	// so when DELETED event occurs on a namespace it would be possible
-	// to terminater related goroutine
+	// to terminater related goroutine.
 	terminators := map[string]chan Done{}
 
 	ns := Event{}
