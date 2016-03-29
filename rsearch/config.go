@@ -56,7 +56,7 @@ type Resource struct {
 func NewConfig(configFile string) (Config, error) {
 	cfg := Config{}
 	if err := gcfg.ReadFileInto(&cfg, configFile); err != nil {
-		return cfg, err
+		return Config{}, err
 	}
 
 	return cfg, nil

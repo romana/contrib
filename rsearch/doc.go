@@ -13,6 +13,6 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// This package prvides means of searching kubernets objects by their selectors
-// the goal is to give the answer to a question - which resources are selecting pods with given label
+// This package provides means of searching kubernets objects by their selectors.
+// The goal is to give the answer to a question - which resources are selecting pods with given label
 package rsearch

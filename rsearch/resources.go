@@ -32,6 +32,12 @@ type Event struct {
 	Object KubeObject `json:"object"`
 }
 
+const (
+	KubeEventAdded         = "ADDED"
+	KubeEventDeleted       = "DELETED"
+	InternalEventDeleteAll = "_DELETE_ALL"
+)
+
 type KubeObject struct {
 	Kind       string            `json:"kind"`
 	Spec       Spec              `json:"spec"`
@@ -86,14 +92,14 @@ func watchEvents(done <-chan Done, url string, config Config, resp *http.Respons
 			if err := dec.Decode(&e); err != nil {
 				// Else notify about error
 				if config.Server.Debug {
-					log.Printf("Failed to decode message from conenction %s due to %s\n. Attempting to re-establish", url, err)
+					log.Printf("Failed to decode message from connection %s due to %s\n. Attempting to re-establish", url, err)
 				}
-				out <- Event{Type: "_CRASH"}
+				out <- Event{Type: InternalEventDeleteAll}
 
 				// And try to re-establish HTTP connection
 				resp, err2 := http.Get(url)
 				if (err2 != nil) && (config.Server.Debug) {
-					log.Printf("Failed establish conenction %s due to %s\n.", url, err)
+					log.Printf("Failed establish connection %s due to %s\n.", url, err)
 				} else if err2 == nil {
 					dec = json.NewDecoder(resp.Body)
 				}

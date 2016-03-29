@@ -17,14 +17,24 @@ package rsearch
 
 func manageResources(ns Event, terminators map[string]chan Done, config Config, out chan Event) {
 	uid := ns.Object.Metadata.Uid
-	if ns.Type == "ADDED" {
+	if ns.Type == KubeEventAdded {
+		if _, ok := terminators[uid]; ok {
+			log.Println("Received ADDED event for uid that is already known, ignoring ", uid)
+			break
+		}
+
 		done := make(chan Done)
 		terminators[uid] = done
 		ns.Object.Produce(out, terminators[uid], config)
-	} else if ns.Type == "DELETED" {
+	} else if ns.Type == KubeEventDeleted {
+		if _, ok := terminators[uid]; !ok {
+			log.Println("Received DELETED event for uid that is not known, ignoring ", uid)
+			break
+		}
+
 		close(terminators[uid])
 		delete(terminators, uid)
-	} else if ns.Type == "_CRASH" {
+	} else if ns.Type == InternalEventDeleteAll {
 		for uid, c := range terminators {
 			close(c)
 			delete(terminators, uid)
@@ -37,8 +47,7 @@ func Conductor(in <-chan Event, done <-chan Done, config Config) <-chan Event {
 	// Idea of this map is to keep termination channels organized
 	// so when DELETED event occurs on a namespace it would be possible
 	// to terminater related goroutine
-	var terminators map[string]chan Done
-	terminators = make(map[string]chan Done)
+	terminators := map[string]chan Done{}
 
 	ns := Event{}
 	out := make(chan Event)

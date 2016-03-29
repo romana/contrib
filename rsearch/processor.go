@@ -88,7 +88,7 @@ func updateStorage(e Event, storage map[string]KubeObject, search map[string]map
 	NPid := e.Object.makeId()
 	Selector := e.Object.getSelector(config)
 
-	if e.Type == "ADDED" {
+	if e.Type == KubeEventAdded {
 		if config.Server.Debug {
 			log.Printf("Processing ADD request for %s", e.Object.Metadata.Name)
 		}
@@ -98,7 +98,7 @@ func updateStorage(e Event, storage map[string]KubeObject, search map[string]map
 			search[Selector] = m
 		}
 		search[Selector][NPid] = true
-	} else if e.Type == "DELETED" {
+	} else if e.Type == KubeEventDeleted {
 		if config.Server.Debug {
 			log.Printf("Processing DELETE request for %s", e.Object.Metadata.Name)
 		}

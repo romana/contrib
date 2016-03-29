@@ -39,8 +39,7 @@ func SearchResource(config Config, req SearchRequest) SearchResponse {
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		log.Println("HTTP request failed", url, err)
-		panic(err)
+		log.Fatal("HTTP request failed", url, err)
 	}
 
 	defer response.Body.Close()
