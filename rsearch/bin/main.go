@@ -3,12 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	search "github.com/romana/contrib/rsearch"
 	"log"
-	//	"net/http"
 	"encoding/json"
 
-	//	"io"
+	search "github.com/romana/contrib/rsearch"
 )
 
 func main() {
@@ -21,17 +19,16 @@ func main() {
 	done := make(chan search.Done)
 
 	config, err := search.NewConfig(*cfgFile)
+	if err != nil {
+		log.Fatalf("Can not read config file %s, %s\n", *cfgFile, err)
+	}
+
 	if *host != "" {
 		config.Server.Host = *host
 	}
 
-	if err != nil {
-		fmt.Printf("Can not read config file %s, %s\n", *cfgFile, err)
-		return
-	}
-
 	if *server {
-		fmt.Println("Starting server")
+		log.Println("Starting server")
 		nsUrl := fmt.Sprintf("%s/%s", config.Api.Url, config.Api.NamespaceUrl)
 		nsEvents, err := search.NsWatch(done, nsUrl, config)
 		if err != nil {
@@ -44,7 +41,7 @@ func main() {
 		search.Serve(config, req)
 	} else if len(*searchTag) > 0 {
 		if config.Server.Debug {
-			fmt.Println("Making request t the server")
+			log.Println("Making request t the server")
 		}
 		r := search.SearchResource(config, search.SearchRequest{Tag: *searchTag})
 		response, _ := json.Marshal(r)
@@ -52,6 +49,7 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(string(response))
+	} else {
+		log.Fatal("Either -s or -r must be given")
 	}
-
 }
