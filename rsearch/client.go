@@ -27,14 +27,18 @@ import (
 // instance if this library.
 func SearchResource(config Config, req SearchRequest) SearchResponse {
 	// TODO need to make url configurable
-	url := config.Server.Host + ":" + config.Server.Port
+	url := fmt.Sprintf("%s://%s:%s", config.Server.Proto, config.Server.Host, config.Server.Port)
 	data := []byte(`{ "tag" : "` + req.Tag + `"}`)
 	if config.Server.Debug {
-		log.Println("Making request with", string(data))
+		log.Printf("Making request with %s to the %s\n", string(data), url)
 	}
 
 	// Making request.
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		log.Fatal("Failed to connect to server", url)
+	}
+
 	request.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	response, err := client.Do(request)

@@ -1,18 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
-	"encoding/json"
 
 	search "github.com/romana/contrib/rsearch"
 )
 
 func main() {
 	var cfgFile = flag.String("c", "", "Kubernetes reverse search config file")
-	var server = flag.Bool("s", false, "Start a server")
-	var host = flag.String("h", "", "Protocol://host for client to connect to")
+	var server = flag.Bool("server-mode", false, "Start a server")
+	var host = flag.String("host", "", "Host for client to connect to")
+	var proto = flag.String("protocol", "", "Protocol to use for client connect to")
+	var port = flag.String("port", "", "TCP port for client to connect to")
 	var searchTag = flag.String("r", "", "Search resources by tag")
 	flag.Parse()
 
@@ -25,6 +27,14 @@ func main() {
 
 	if *host != "" {
 		config.Server.Host = *host
+	}
+
+	if *proto != "" {
+		config.Server.Proto = *proto
+	}
+
+	if *port != "" {
+		config.Server.Port = *port
 	}
 
 	if *server {
@@ -41,7 +51,7 @@ func main() {
 		search.Serve(config, req)
 	} else if len(*searchTag) > 0 {
 		if config.Server.Debug {
-			log.Println("Making request t the server")
+			log.Println("Making request to the server")
 		}
 		r := search.SearchResource(config, search.SearchRequest{Tag: *searchTag})
 		response, err := json.Marshal(r)

@@ -41,7 +41,8 @@ selector=podSelector
 
 [server]
 port=9700
-host=http://localhost
+host=localhost
+proto=http
 debug=false
 `
 

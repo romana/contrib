@@ -34,6 +34,7 @@ type Config struct {
 type Server struct {
 	Port  string
 	Host  string
+	Proto string
 	Debug bool
 }
 
