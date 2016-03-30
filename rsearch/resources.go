@@ -59,7 +59,7 @@ func (o KubeObject) getSelector(config Config) string {
 	var selector string
 	// TODO this should use Config.Resource.Selector path instead of podSelector.
 	for k, v := range o.Spec.PodSelector {
-		selector = k + "/" + v + "#"
+		selector = k + "=" + v + "#"
 	}
 	return selector
 }
