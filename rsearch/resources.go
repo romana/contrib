@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+	//	"time"
 )
 
 /*
@@ -87,19 +87,22 @@ func watchEvents(done <-chan Done, url string, config Config, resp *http.Respons
 		log.Println("Received namespace related event from kubernetes", resp.Body)
 	}
 
-	tick := time.Tick(100 * time.Millisecond)
 	dec := json.NewDecoder(resp.Body)
 	var e Event
 
 	for {
 		select {
-		case <-tick:
-			// If decoded successfully
-			if err := dec.Decode(&e); err != nil {
-				// Else notify about error
+		case <-done:
+			return
+		default:
+			// Attempting to read event from HTTP connection
+			err := dec.Decode(&e)
+			if err != nil {
+				// If fail
 				if config.Server.Debug {
 					log.Printf("Failed to decode message from connection %s due to %s\n. Attempting to re-establish", url, err)
 				}
+				// Then stop all goroutines
 				out <- Event{Type: InternalEventDeleteAll}
 
 				// And try to re-establish HTTP connection
@@ -109,12 +112,10 @@ func watchEvents(done <-chan Done, url string, config Config, resp *http.Respons
 				} else if err2 == nil {
 					dec = json.NewDecoder(resp.Body)
 				}
-				// then submit event
 			} else {
+				// Else submit event
 				out <- e
 			}
-		case <-done:
-			return
 		}
 	}
 }
