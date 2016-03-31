@@ -44,10 +44,18 @@ func TestResoureProcessor(t *testing.T) {
 	events <- e
 
 	responseChannel := make(chan SearchResponse)
-	searchRequest := SearchRequest{Tag: "tier/backend#", Resp: responseChannel}
+	searchRequest := SearchRequest{Tag: "tier=backend#", Resp: responseChannel}
 	req <- searchRequest
 
-	result := <-searchRequest.Resp
+	result, ok := <-searchRequest.Resp
+	if !ok {
+		t.Error("Response channel in SearchRequest object found unexpectedly closed")
+	}
+
+	if len(result) == 0 {
+		t.Error("Search request is empty - expecting one result")
+	}
+
 	if result[0].Metadata.Name != "pol1" {
 		t.Error("Unexpected search response = expect policy name = pol1, got ", result[0].Metadata.Name)
 	}
